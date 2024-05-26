@@ -6,9 +6,10 @@ import {contractAbi} from './data/abi.jsx';
 
 function App() {
   const mainAddress:string = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
-  const contractAddress:string = '0xFd822abecA70BB5560E22CEc21738bB3db802A94';
+  const contractAddress:string = '0xfd822abeca70bb5560e22cec21738bb3db802a94';
   const [provider, setProvider] = useState<ethers.JsonRpcProvider|null>(null);
   const [balance,setBalance] = useState<bigint|null>(null);
+  const [collateral,setCollateral] = useState<bigint|null>(null);
   const [contract,setContract] = useState<ethers.Contract|null>(null);
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
@@ -35,7 +36,7 @@ function App() {
           setBalance(_balance);
           }}
         >Get Balance</button>}
-        {balance && <h2>Balance of current account: {balance?.toString()}</h2>}
+        {balance && <h2>Balance of current account: {(Number(balance)/(10**18))?.toString()}</h2>}
        </div>
 
 
@@ -50,16 +51,26 @@ function App() {
           //     gasLimit: 3000000, 
           // };
             // await contract.supplyCollateral(payment);
-              
-            const value = await contract.getBaseToken();
+
             
-            console.log('collateralized asset value: '+ value.toString());
+
+
+            const value = ethers.parseEther('1');
+            const tx = await contract.supplyCollateral({ value: value,gasLimit:10000000 });
+            const receipt = await tx.wait();
+            console.log('Transaction hash:', receipt.hash);
+            
+            const collateralBalance = await contract.getValueOfAllCollateralizedAssetsE8({gasLimit:1000000 });
+            setCollateral(collateralBalance);
+            
+
 
           }}
         >
           Supply COMP
           
         </button>
+        {collateral && <h2>Collateral of current account: {collateral.toString()}</h2>}
         
        </div>}
       </div>
