@@ -6,7 +6,7 @@ import {contractAbi} from './data/abi.jsx';
 
 function App() {
   const mainAddress:string = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
-  const contractAddress:string = '0x9f21D9a53FC62014829c018A2E7a480364e7F02D';
+  const contractAddress:string = '0x48B16b015F0495a637A18B133D18156524CF10cC';
   const [provider, setProvider] = useState<ethers.JsonRpcProvider|null>(null);
   const [balance,setBalance] = useState<bigint|null>(null);
   const [collateral,setCollateral] = useState<bigint|null>(null);
@@ -63,9 +63,9 @@ function App() {
             console.log('Transaction hash:', receipt.hash);
             
             const collateralBalance = await contract.getValueOfAllCollateralizedAssetsE8();
-            
-            setCollateral(ethers.toBigInt(collateralBalance.data));
             console.log(collateralBalance);
+            
+            setCollateral(collateralBalance);
             
 
 
@@ -78,9 +78,9 @@ function App() {
         <button
         
           onClick={async()=>{
-            const collateralBalance = await contract.getCollateralizedAssets();
-            // setCollateral(ethers.toBigInt(collateralBalance.data));
-            console.log(collateralBalance);
+            const collateralBalance = await contract.getValueOfAllCollateralizedAssetsE8();
+            setCollateral(collateralBalance);
+
             
           }}
         >
