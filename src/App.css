@@ -2,15 +2,14 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
-.balance{
-  display: grid;
-  justify-items: center;
-  width: 100%;
-  margin-bottom: 10px;
+
+.buttonLabel{
+  display: flex;
+  align-items: center;
 }
+
 
 .logo {
   height: 6em;
