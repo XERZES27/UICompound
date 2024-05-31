@@ -129,6 +129,13 @@ export const contractAbi = {
     },
     {
       type: "function",
+      name: "getBorrowedAmountE6",
+      inputs: [],
+      outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+      stateMutability: "view",
+    },
+    {
+      type: "function",
       name: "getCOMPBalance",
       inputs: [],
       outputs: [{ name: "", type: "uint256", internalType: "uint256" }],

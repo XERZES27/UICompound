@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { contractAbi } from "./data/abi.jsx";
 
 function App() {
@@ -10,6 +10,8 @@ function App() {
   const [provider, setProvider] = useState<ethers.JsonRpcProvider | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
   const [collateral, setCollateral] = useState<bigint | null>(null);
+  const [borrowedAmount, setBorrowedAmount] = useState<bigint | null>(null);
+  const [borrowedAmountInUSDC, setBorrowedAmountInUSDC] = useState("1");
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   // Similar to componentDidMount and componentDidUpdate:
 
@@ -19,9 +21,14 @@ function App() {
     setCollateral(collateralBalance);
   }
 
-  async function getBalance(_provider: ethers.JsonRpcApiProvider){
+  async function getBalance(_provider: ethers.JsonRpcApiProvider) {
     const _balance = await _provider.getBalance(mainAddress);
-                setBalance(_balance);
+    setBalance(_balance);
+  }
+
+  async function getBorrowedAmount(_contract: ethers.Contract) {
+    const _borrowedAmount = await _contract.getWithDrawedAmount();
+    setBorrowedAmount(_borrowedAmount);
   }
 
   useEffect(() => {
@@ -38,6 +45,7 @@ function App() {
     setContract(() => _contract);
     getCollateralBalance(_contract);
     getBalance(_provider);
+    getBorrowedAmount(_contract);
     setProvider(() => _provider);
   }, []);
 
@@ -46,12 +54,8 @@ function App() {
       <div>
         <h1>Compound</h1>
         <div className="buttonLabel">
-          
           {balance && (
-            <h2>
-              Balance :{" "}
-              {(Number(balance) / 10 ** 18)?.toString()} ETH
-            </h2>
+            <h2>Balance : {(Number(balance) / 10 ** 18)?.toString()} ETH</h2>
           )}
           {provider && (
             <button
@@ -63,29 +67,43 @@ function App() {
             </button>
           )}
         </div>
-
         <div className="buttonLabel">
-            
-            {collateral && (
-              <h2>
-                Collateral : {" "}
-                {(Number(collateral) / Math.pow(10, 8)).toString()} USDC
-              </h2>
-            )}
+          <h2>
+            BorrowedAmount : {(Number(borrowedAmount) / 10 ** 8)?.toString()}{" "}
+            USDC
+          </h2>
+
+          {provider && (
             <button
               onClick={async () => {
-                getCollateralBalance(contract);
+                getBorrowedAmount(contract);
               }}
             >
               Refresh
             </button>
-            </div>
+          )}
+        </div>
+
+        <div className="buttonLabel">
+          {collateral && (
+            <h2>
+              Collateral : {(Number(collateral) / Math.pow(10, 8)).toString()}{" "}
+              USDC
+            </h2>
+          )}
+          <button
+            onClick={async () => {
+              getCollateralBalance(contract);
+            }}
+          >
+            Refresh
+          </button>
+        </div>
 
         {contract && (
           <div>
             <button
               onClick={async () => {
-
                 const value = ethers.parseEther("2");
                 const tx = await contract.supplyCollateralInNativeEth({
                   value: value,
@@ -98,10 +116,36 @@ function App() {
             >
               Supply COMP
             </button>
-            </div>
+          </div>
         )}
-            
-          
+
+        {contract && (
+          <div>
+            <button
+              onClick={async () => {
+                const tx = await contract.BorrowAsset(
+                  "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+                  borrowedAmountInUSDC,
+                  {
+                    gasLimit: 10000000,
+                  }
+                );
+                await tx.wait();
+                getBorrowedAmount(contract);
+              }}
+            >
+              Borrow USDC
+            </button>
+            <input
+              name=""
+              type="number"
+              value={borrowedAmountInUSDC}
+              onChange={(event) => {
+                setBorrowedAmountInUSDC(event.target.value);
+              }}
+            ></input>
+          </div>
+        )}
       </div>
     </>
   );
